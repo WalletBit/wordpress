@@ -120,7 +120,7 @@
 		$currencyId = get_option('currency_type');
 		$currency = $wpdb->get_var($wpdb->prepare("SELECT `code` FROM `" . WPSC_TABLE_CURRENCY_LIST . "` WHERE `id` = %d LIMIT 1", $currencyId));
 
-		$price = number_format($wpsc_cart->total_price,2);
+		$price = number_format($wpsc_cart->total_price, 2, '.', '');
 
 		$options = http_build_query($options, '', '|');
 		
@@ -151,10 +151,18 @@
 		// proccessing payment only if hash is valid
 		if ($_POST["merchant"] == get_option('walletbit_email') && $_POST["encrypted"] == $hash && $_POST["status"] == 1)
 		{
-			print '1';
+			$purchase_log = $wpdb->get_row("SELECT totalprice FROM `" . WPSC_TABLE_PURCHASE_LOGS . "` WHERE `sessionid`= " . intval($_POST['sessionid']) . " LIMIT 1", ARRAY_A) ;
 
-			$sql = "UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "` SET `processed`= '2' WHERE `sessionid`=" . intval($_POST['sessionid']);
-			$wpdb->query($sql);
+			$bitcoin = number_format($_POST['amount'] * $_POST['rate'], 2, '.', '');
+			$amount = number_format($purchase_log['totalprice'], 2, '.', '');
+
+			if ($bitcoin >= $purchase_log['totalprice'])
+			{
+				$sql = "UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "` SET `processed`= '2' WHERE `sessionid`=" . intval($_POST['sessionid']);
+				$wpdb->query($sql);
+			}			
+			
+			print '1';
 		}
 	}
 
