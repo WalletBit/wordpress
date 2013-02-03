@@ -150,6 +150,9 @@
 		{
 			$sql = "UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "` SET `processed`= '6' WHERE `sessionid`=" . intval($_POST['sessionid']);
 			$wpdb->query($sql);
+
+			print '1';
+			exit;
 		}
 		else
 		{
@@ -187,11 +190,11 @@
 					$sql = "UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "` SET `processed`= '6' WHERE `sessionid`=" . intval($_POST['sessionid']);
 					$wpdb->query($sql);
 				}
+
+				print '1';
+				exit;
 			}
 		}
-
-		print '1';
-		exit;
 	}
 
 	add_action('init', 'walletbit_callback');
