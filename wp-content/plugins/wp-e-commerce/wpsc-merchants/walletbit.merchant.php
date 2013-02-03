@@ -161,7 +161,7 @@
 				$sql = "UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "` SET `processed`= '3' WHERE `sessionid`=" . intval($_POST['sessionid']);
 				$wpdb->query($sql);
 			}
-			else if ($bitcoin < $purchase_log['totalprice'])
+			else if ($bitcoin < $purchase_log['totalprice'] && $bitcoin > 0)
 			{
 				$sql = "UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "` SET `processed`= '2' WHERE `sessionid`=" . intval($_POST['sessionid']);
 				$wpdb->query($sql);
