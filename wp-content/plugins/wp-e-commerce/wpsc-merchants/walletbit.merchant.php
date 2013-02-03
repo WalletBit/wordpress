@@ -153,7 +153,7 @@
 		{
 			if (strtolower($_POST['type']) == 'cancel')
 			{
-				sql = "UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "` SET `processed`= '6' WHERE `sessionid`=" . intval($_POST['sessionid']);
+				$sql = "UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "` SET `processed`= '6' WHERE `sessionid`=" . intval($_POST['sessionid']);
 				$wpdb->query($sql);
 			}
 			else
