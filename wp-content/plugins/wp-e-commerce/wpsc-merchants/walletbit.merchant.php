@@ -151,25 +151,33 @@
 		// proccessing payment only if hash is valid
 		if ($_POST["merchant"] == get_option('walletbit_email') && $_POST["encrypted"] == $hash && $_POST["status"] == 1)
 		{
-			$purchase_log = $wpdb->get_row("SELECT totalprice FROM `" . WPSC_TABLE_PURCHASE_LOGS . "` WHERE `sessionid`= " . intval($_POST['sessionid']) . " LIMIT 1", ARRAY_A) ;
-
-			$bitcoin = number_format($_POST['amount'] * $_POST['rate'], 2, '.', '');
-			$amount = number_format($purchase_log['totalprice'], 2, '.', '');
-
-			if ($bitcoin >= $purchase_log['totalprice'])
+			if (strtolower($_POST['type']) == 'cancel')
 			{
-				$sql = "UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "` SET `processed`= '3' WHERE `sessionid`=" . intval($_POST['sessionid']);
+				sql = "UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "` SET `processed`= '6' WHERE `sessionid`=" . intval($_POST['sessionid']);
 				$wpdb->query($sql);
 			}
-			else if ($bitcoin < $purchase_log['totalprice'] && $bitcoin > 0)
-			{
-				$sql = "UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "` SET `processed`= '2' WHERE `sessionid`=" . intval($_POST['sessionid']);
-				$wpdb->query($sql);
-			}			
 			else
 			{
-				$sql = "UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "` SET `processed`= '6' WHERE `sessionid`=" . intval($_POST['sessionid']);
-				$wpdb->query($sql);
+				$purchase_log = $wpdb->get_row("SELECT totalprice FROM `" . WPSC_TABLE_PURCHASE_LOGS . "` WHERE `sessionid`= " . intval($_POST['sessionid']) . " LIMIT 1", ARRAY_A) ;
+
+				$bitcoin = number_format($_POST['amount'] * $_POST['rate'], 2, '.', '');
+				$amount = number_format($purchase_log['totalprice'], 2, '.', '');
+
+				if ($bitcoin >= $purchase_log['totalprice'])
+				{
+					$sql = "UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "` SET `processed`= '3' WHERE `sessionid`=" . intval($_POST['sessionid']);
+					$wpdb->query($sql);
+				}
+				else if ($bitcoin < $purchase_log['totalprice'] && $bitcoin > 0)
+				{
+					$sql = "UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "` SET `processed`= '2' WHERE `sessionid`=" . intval($_POST['sessionid']);
+					$wpdb->query($sql);
+				}
+				else
+				{
+					$sql = "UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "` SET `processed`= '6' WHERE `sessionid`=" . intval($_POST['sessionid']);
+					$wpdb->query($sql);
+				}
 			}
 			
 			print '1';
