@@ -141,22 +141,31 @@
 		$_POST["merchant"].":".
 		$_POST["customer_email"].":".
 		$_POST["amount"].":".
-		$_POST["batchnumber"].":".
-		$_POST["txid"].":".
-		$_POST["address"].":".
 		get_option('walletbit_securityword');
 
 		$hash = strtoupper(hash('sha256', $str));
 
 		// proccessing payment only if hash is valid
-		if ($_POST["merchant"] == get_option('walletbit_email') && $_POST["encrypted"] == $hash && $_POST["status"] == 1)
+		if (isset($_POST['type']) && strtolower($_POST['type']) == 'cancel' && $_POST["merchant"] == get_option('walletbit_email') && $_POST["encrypted"] == $hash)
 		{
-			if (strtolower($_POST['type']) == 'cancel')
-			{
-				$sql = "UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "` SET `processed`= '6' WHERE `sessionid`=" . intval($_POST['sessionid']);
-				$wpdb->query($sql);
-			}
-			else
+			$sql = "UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "` SET `processed`= '6' WHERE `sessionid`=" . intval($_POST['sessionid']);
+			$wpdb->query($sql);
+		}
+		else
+		{
+			$str =
+			$_POST["merchant"].":".
+			$_POST["customer_email"].":".
+			$_POST["amount"].":".
+			$_POST["batchnumber"].":".
+			$_POST["txid"].":".
+			$_POST["address"].":".
+			get_option('walletbit_securityword');
+
+			$hash = strtoupper(hash('sha256', $str));
+
+			// proccessing payment only if hash is valid
+			if ($_POST["merchant"] == get_option('walletbit_email') && $_POST["encrypted"] == $hash && $_POST["status"] == 1)
 			{
 				$purchase_log = $wpdb->get_row("SELECT totalprice FROM `" . WPSC_TABLE_PURCHASE_LOGS . "` WHERE `sessionid`= " . intval($_POST['sessionid']) . " LIMIT 1", ARRAY_A) ;
 
@@ -179,9 +188,10 @@
 					$wpdb->query($sql);
 				}
 			}
-			
-			print '1';
 		}
+
+		print '1';
+		exit;
 	}
 
 	add_action('init', 'walletbit_callback');
