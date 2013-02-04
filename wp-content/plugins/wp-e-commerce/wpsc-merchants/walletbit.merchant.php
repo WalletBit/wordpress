@@ -122,15 +122,28 @@
 
 		$price = number_format($wpsc_cart->total_price, 2, '.', '');
 
-		$options = http_build_query($options, '', '|');
-		
-		$url = 'https://walletbit.com/pay?token=' . get_option('walletbit_token') . '&item_name=' . $item_name . '&amount=' . $price . '&currency=' . $currency . '&returnurl=' . rawurlencode(get_option('siteurl')) . '&additional=sessionid=' . $sessionid . '|' . $options;
+		//$options = http_build_query($options, '', '|');
+
+		//$url = 'https://walletbit.com/pay?token=' . get_option('walletbit_token') . '&item_name=' . $options['itemDesc'] . '&amount=' . $price . '&currency=' . $currency . '&returnurl=' . rawurlencode(get_option('siteurl')) . '&additional=sessionid=' . $sessionid;
+
+print '<form id="pay" method="post" action="https://walletbit.com/pay">';
+print '  <input type="hidden" name="token" value="' . get_option('walletbit_token') . '" />';
+print '  <input type="hidden" name="item_name" value="' . $options['itemDesc'] . '" />';
+print '  <input type="hidden" name="amount" value="' . $price . '" />';
+print '  <input type="hidden" name="currency" value="' . $currency . '" />';
+print '  <input type="hidden" name="returnurl" value="' . rawurlencode(get_option('shopping_cart_url')) . '" />';
+print '  <input type="hidden" name="additional" value="purchaseid=' . $purchase_log['id'] . '|sessionid=' . $sessionid . '|email=' . $options['buyerEmail'] . '" />';
+print '  <input type="hidden" name="test" value="0" />';
+print '</form>';
+print '<script type="text/javascript">';
+print '	document.getElementById("pay").submit();';
+print '</script>';
 
 		$wpsc_cart->empty_cart();
 		unset($_SESSION['WpscGatewayErrorMessage']);
 
-		header('Location: ' . $url);
-		print '<meta http-equiv="refresh" content="0; url=' . $url . '"/>';
+		//header('Location: ' . $url);
+		//print '<meta http-equiv="refresh" content="0; url=' . $url . '"/>';
 	}
 
 	function walletbit_callback()
@@ -148,7 +161,7 @@
 		// proccessing payment only if hash is valid
 		if (isset($_POST['type']) && strtolower($_POST['type']) == 'cancel' && $_POST["merchant"] == get_option('walletbit_email') && $_POST["encrypted"] == $hash)
 		{
-			$sql = "UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "` SET `processed`= '6' WHERE `sessionid`=" . intval($_POST['sessionid']);
+			$sql = "UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "` SET `processed`= '6' WHERE `id`=" . intval($_POST['purchaseid']);
 			$wpdb->query($sql);
 
 			print '1';
@@ -170,24 +183,24 @@
 			// proccessing payment only if hash is valid
 			if ($_POST["merchant"] == get_option('walletbit_email') && $_POST["encrypted"] == $hash && $_POST["status"] == 1)
 			{
-				$purchase_log = $wpdb->get_row("SELECT totalprice FROM `" . WPSC_TABLE_PURCHASE_LOGS . "` WHERE `sessionid`= " . intval($_POST['sessionid']) . " LIMIT 1", ARRAY_A) ;
+				$purchase_log = $wpdb->get_row("SELECT totalprice FROM `" . WPSC_TABLE_PURCHASE_LOGS . "` WHERE `id`= " . intval($_POST['purchaseid']) . " LIMIT 1", ARRAY_A) ;
 
 				$bitcoin = number_format($_POST['amount'] * $_POST['rate'], 2, '.', '');
 				$amount = number_format($purchase_log['totalprice'], 2, '.', '');
 
 				if ($bitcoin >= $purchase_log['totalprice'])
 				{
-					$sql = "UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "` SET `processed`= '3' WHERE `sessionid`=" . intval($_POST['sessionid']);
+					$sql = "UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "` SET `processed`= '3' WHERE `id`=" . intval($_POST['purchaseid']);
 					$wpdb->query($sql);
 				}
 				else if ($bitcoin < $purchase_log['totalprice'] && $bitcoin > 0)
 				{
-					$sql = "UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "` SET `processed`= '2' WHERE `sessionid`=" . intval($_POST['sessionid']);
+					$sql = "UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "` SET `processed`= '2' WHERE `id`=" . intval($_POST['purchaseid']);
 					$wpdb->query($sql);
 				}
 				else
 				{
-					$sql = "UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "` SET `processed`= '6' WHERE `sessionid`=" . intval($_POST['sessionid']);
+					$sql = "UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "` SET `processed`= '6' WHERE `id`=" . intval($_POST['purchaseid']);
 					$wpdb->query($sql);
 				}
 
