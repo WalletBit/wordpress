@@ -188,12 +188,12 @@ print '</script>';
 				$bitcoin = number_format($_POST['amount'] * $_POST['rate'], 2, '.', '');
 				$amount = number_format($purchase_log['totalprice'], 2, '.', '');
 
-				if ($bitcoin >= $purchase_log['totalprice'])
+				if ($bitcoin >= $amount)
 				{
 					$sql = "UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "` SET `processed`= '3' WHERE `id`=" . intval($_POST['purchaseid']);
 					$wpdb->query($sql);
 				}
-				else if ($bitcoin < $purchase_log['totalprice'] && $bitcoin > 0)
+				else if ($bitcoin < $amount && $bitcoin > 0)
 				{
 					$sql = "UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "` SET `processed`= '2' WHERE `id`=" . intval($_POST['purchaseid']);
 					$wpdb->query($sql);
